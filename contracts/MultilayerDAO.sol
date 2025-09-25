@@ -49,7 +49,6 @@ contract MultilayerDAO is
         trustedSigner = _trustedSigner;
     }
 
-    // PURE функция для расчета номера периода
     function getPeriodIndex(uint256 timestamp) public pure returns (uint256) {
         return timestamp / PERIOD_DURATION;
     }
@@ -58,7 +57,6 @@ contract MultilayerDAO is
         return getPeriodIndex(block.timestamp);
     }
 
-    // Функция для установки сида с подписью (газ требуется только один раз за период)
     function revealSeedForPeriod(
         uint256 periodIndex,
         bytes32 seed,
@@ -69,7 +67,6 @@ contract MultilayerDAO is
             "Seed already revealed"
         );
 
-        // Проверяем подпись
         bytes32 messageHash = keccak256(
             abi.encodePacked("QuartileDAO Seed", periodIndex, seed)
         );
@@ -90,7 +87,6 @@ contract MultilayerDAO is
         emit SeedRevealed(periodIndex, seed, msg.sender);
     }
 
-    // PURE функция определения роли (БЕЗ ГАЗА после установки сида)
     function getParticipantRole(address account) public view returns (uint8) {
         uint256 periodIndex = getCurrentPeriodIndex();
         SignedSeed memory seedData = periodSeeds[periodIndex];
@@ -108,7 +104,6 @@ contract MultilayerDAO is
         return roleValue < RANDOM_PARTICIPANTS_PERCENTAGE ? 1 : 0;
     }
 
-    // Модифицированные функции с проверкой через PURE функцию
     function propose(
         address[] memory targets,
         uint256[] memory values,
@@ -140,7 +135,6 @@ contract MultilayerDAO is
         return super.castVote(proposalId, support);
     }
 
-    // Функция для предварительной проверки роли в будущем периоде
     function getFutureRole(
         address account,
         uint256 periodsFromNow
@@ -161,7 +155,6 @@ contract MultilayerDAO is
         return roleValue < RANDOM_PARTICIPANTS_PERCENTAGE ? 1 : 0;
     }
 
-    // Стандартные функции Governor...
     function votingDelay()
         public
         view
