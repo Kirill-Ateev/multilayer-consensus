@@ -1,35 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { ethers } from 'ethers';
+import { useState } from 'react';
+import ConnectWallet from './components/ConnectWallet';
+import DaoControl from './components/DaoControl';
+import ProposalList from './components/ProposalList';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
+  const [signer, setSigner] = useState<ethers.Signer | null>(null);
+  const [account, setAccount] = useState<string | null>(null);
+  const [daoAddress, setDaoAddress] = useState<string>('');
+
+  async function onConnected(p: ethers.BrowserProvider, addr: string) {
+    setProvider(p);
+    setAccount(addr);
+    setSigner(await p.getSigner());
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div style={{ padding: 24, fontFamily: 'Inter, system-ui, Arial' }}>
+      <h1>DAO Dashboard — Minimal</h1>
+      <ConnectWallet onConnected={onConnected} />
 
-export default App
+      <div style={{ marginTop: 16 }}>
+        <label>DAO Address: </label>
+        <input
+          value={daoAddress}
+          onChange={(e) => setDaoAddress(e.target.value)}
+          style={{ width: '50%' }}
+        />
+      </div>
+
+      {daoAddress && (
+        <div style={{ marginTop: 24 }}>
+          <ProposalList
+            daoAddress={daoAddress}
+            provider={provider}
+            signer={signer}
+          />
+          <DaoControl daoAddress={daoAddress} signer={signer} />
+        </div>
+      )}
+
+      <div style={{ marginTop: 40, color: '#666' }}>
+        <small>
+          Notes: This is minimal code intended for local/private EVM usage. Add
+          styling, error handling, pagination and event subscriptions for
+          production.
+        </small>
+      </div>
+    </div>
+  );
+}
